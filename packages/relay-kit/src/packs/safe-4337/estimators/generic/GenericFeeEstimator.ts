@@ -4,7 +4,7 @@ import {
   IFeeEstimator,
   UserOperationStringValues
 } from '@wdk-safe-global/relay-kit/packs/safe-4337/types'
-import { createPublicClient, http } from 'viem'
+import { createPublicClient, http, custom } from 'viem'
 import {
   createBundlerClient,
   userOperationToHexValues
@@ -12,19 +12,23 @@ import {
 import { RPC_4337_CALLS } from '@wdk-safe-global/relay-kit/packs/safe-4337/constants'
 import { PaymasterRpcSchema } from './types'
 
+type Eip1193Provider = {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>
+}
+
 /**
  * GenericFeeEstimator is a class that implements the IFeeEstimator interface. You can implement three optional methods that will be called during the estimation process:
  * - preEstimateUserOperationGas: Setup the userOperation before calling the eth_estimateUserOperation gas method.
  * - postEstimateUserOperationGas: Adjust the userOperation values returned after calling the eth_estimateUserOperation method.
  */
 export class GenericFeeEstimator implements IFeeEstimator {
-  nodeUrl: string
+  provider: string | Eip1193Provider
   chainId: string
   gasMultiplier: number
   defaultVerificationGasLimitOverhead?: bigint
 
-  constructor(nodeUrl: string, chainId: string, gasMultiplier: number = 1.5) {
-    this.nodeUrl = nodeUrl
+  constructor(provider: string | Eip1193Provider, chainId: string, gasMultiplier: number = 1.5) {
+    this.provider = provider
     this.chainId = chainId
     if (gasMultiplier <= 0) {
       throw new Error("gasMultiplier can't be equal or less than 0.")
@@ -50,7 +54,7 @@ export class GenericFeeEstimator implements IFeeEstimator {
           : {}
 
       const [feeData, paymasterStubData] = await Promise.all([
-        this.#getUserOperationGasPrices(this.nodeUrl),
+        this.#getUserOperationGasPrices(),
         paymasterClient.request({
           method: RPC_4337_CALLS.GET_PAYMASTER_STUB_DATA,
           params: [
@@ -66,7 +70,7 @@ export class GenericFeeEstimator implements IFeeEstimator {
         ...paymasterStubData
       }
     } else {
-      const feeData = await this.#getUserOperationGasPrices(this.nodeUrl)
+      const feeData = await this.#getUserOperationGasPrices()
       return {
         ...feeData,
         ...{}
@@ -113,11 +117,11 @@ export class GenericFeeEstimator implements IFeeEstimator {
     return erc20PaymasterData
   }
 
-  async #getUserOperationGasPrices(
-    nodeUrl: string
-  ): Promise<Pick<EstimateGasData, 'maxFeePerGas' | 'maxPriorityFeePerGas'>> {
+  async #getUserOperationGasPrices(): Promise<
+    Pick<EstimateGasData, 'maxFeePerGas' | 'maxPriorityFeePerGas'>
+  > {
     const client = createPublicClient({
-      transport: http(nodeUrl)
+      transport: typeof this.provider === 'string' ? http(this.provider) : custom(this.provider)
     })
     const [block, maxPriorityFeePerGas] = await Promise.all([
       client.getBlock({ blockTag: 'latest' }),
