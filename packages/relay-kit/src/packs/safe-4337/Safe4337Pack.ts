@@ -72,6 +72,227 @@ const MAX_ERC20_AMOUNT_TO_APPROVE =
 
 const EQ_OR_GT_1_4_1 = '>=1.4.1'
 
+const SAFE_PROXY_CREATION_CODES = {
+  latest:
+    '0x608060405234801561001057600080fd5b506040516101e63803806101e68339818101604052602081101561003357600080fd5b8101908080519060200190929190505050600073ffffffffffffffffffffffffffffffffffffffff168173ffffffffffffffffffffffffffffffffffffffff1614156100ca576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260228152602001806101c46022913960400191505060405180910390fd5b806000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055505060ab806101196000396000f3fe608060405273ffffffffffffffffffffffffffffffffffffffff600054167fa619486e0000000000000000000000000000000000000000000000000000000060003514156050578060005260206000f35b3660008037600080366000845af43d6000803e60008114156070573d6000fd5b3d6000f3fea264697066735822122003d1488ee65e08fa41e58e888a9865554c535f2c77126a82cb4c0f917f31441364736f6c63430007060033496e76616c69642073696e676c65746f6e20616464726573732070726f7669646564',
+  zkSync: {
+    latest:
+      '0x0000000000000000000000000000000000000000000000000000000000000000000000000100003b6cfa15bd7d1cae1c9c022074524d7785d34859ad0576d8fab4305d4f00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000'
+  }
+} as const
+
+const ZKSYNC_CREATE2_PREFIX = '0x2020dba91b30cc0006188af794c2fb30dd8520db7e2c088b7fc7c103c00ca494'
+const ZKSYNC_SAFE_PROXY_DEPLOYED_BYTECODE: { [version: string]: { deployedBytecodeHash: Hash } } = {
+  '1.3.0': {
+    deployedBytecodeHash: '0x0100004124426fb9ebb25e27d670c068e52f9ba631bd383279a188be47e3f86d'
+  },
+  '1.4.1': {
+    deployedBytecodeHash: '0x0100003b6cfa15bd7d1cae1c9c022074524d7785d34859ad0576d8fab4305d4f'
+  }
+}
+
+function zkSyncCreate2Address(from: string, safeVersion: string, salt: Hex, input: Hex): string {
+  const bytecodeHash = ZKSYNC_SAFE_PROXY_DEPLOYED_BYTECODE[safeVersion]?.deployedBytecodeHash
+  if (!bytecodeHash) throw new Error(`Unsupported Safe version for zkSync: ${safeVersion}`)
+  const inputHash = keccak256(input)
+  const addressBytes = keccak256(
+    concat([ZKSYNC_CREATE2_PREFIX, pad(asHex(from)), salt, bytecodeHash, inputHash])
+  ).slice(26)
+  return `0x${addressBytes}`
+}
+
+/**
+ * Gets the Safe deployment information (version, factory, singleton).
+ * This helper function gets the Safe core version and contract addresses
+ * based on the chain ID and Safe version.
+ *
+ * @param {bigint | number} chainId - The chain ID
+ * @param {string} safeVersion - The Safe core version to use
+ * @returns {Object} Object containing safeVersion, factoryAddress, and singletonAddress
+ * @throws {Error} If no deployment information is found for the chain ID and version
+ */
+function getSafeDeploymentInfo(
+  chainId: bigint | number,
+  safeVersion: string
+): {
+  safeVersion: string
+  factoryAddress: string
+  singletonAddress: string
+} {
+  const singletonDeployment = getSafeL2SingletonDeployment({
+    version: safeVersion as SafeVersion,
+    released: true
+  })
+
+  const factoryDeployment = getProxyFactoryDeployment({
+    version: safeVersion as SafeVersion,
+    released: true
+  })
+
+  if (!singletonDeployment) {
+    throw new Error(`No Safe singleton deployment found for version ${safeVersion}`)
+  }
+
+  if (!factoryDeployment) {
+    throw new Error(`No Safe proxy factory deployment found for version ${safeVersion}`)
+  }
+
+  const chainIdStr = chainId.toString()
+  const singletonAddress = singletonDeployment.networkAddresses[chainIdStr]
+  const factoryAddress = factoryDeployment.networkAddresses[chainIdStr]
+
+  if (!singletonAddress) {
+    throw new Error(
+      `No Safe singleton address found for chain ID ${chainId} and version ${safeVersion}`
+    )
+  }
+
+  if (!factoryAddress) {
+    throw new Error(
+      `No Safe proxy factory address found for chain ID ${chainId} and version ${safeVersion}`
+    )
+  }
+
+  return {
+    safeVersion,
+    factoryAddress,
+    singletonAddress
+  }
+}
+
+/**
+ * Detects if a chain is zkSync.
+ *
+ * @param {bigint | number} chainId - The chain ID to check.
+ * @returns {boolean} True if the provided chain is a zkSync network; otherwise false.
+ */
+function isZkSyncChain(chainId: bigint | number): boolean {
+  const ZKSYNC_CHAIN_IDS = new Set([
+    324, // zkSync Era mainnet
+    300, // zkSync Era testnet
+    280, // zkSync Era localnet
+    232 // zkSync Era internal testnet
+  ])
+  return ZKSYNC_CHAIN_IDS.has(Number(chainId))
+}
+
+/**
+ * Returns the Safe Proxy creation bytecode for the provided Safe version on EVM chains.
+ *
+ * - Versions 1.0.0 - 1.2.0 use the legacy bytecode.
+ * - Versions 1.3.0+ use the latest bytecode.
+ * - zkSync chains are not supported by this function (different CREATE2 mechanics).
+ *
+ * @param {string} safeVersion - The Safe core version used to select the bytecode.
+ * @param {bigint | number} [chainId] - Optional chain ID; if a zkSync chain is detected, an error is thrown.
+ * @returns {`0x${string}`} The proxy creation bytecode for the given Safe version.
+ * @throws {Error} If called for a zkSync chain.
+ * @return {`0x${string}`}
+ */
+function getProxyCreationCode(chainId?: bigint | number): `0x${string}` {
+  if (chainId && isZkSyncChain(chainId)) {
+    return SAFE_PROXY_CREATION_CODES.zkSync.latest
+  }
+  return SAFE_PROXY_CREATION_CODES.latest
+}
+
+/**
+ * Encodes the Safe setup initializer data synchronously.
+ *
+ * Produces the exact calldata used by Safe deployment, matching version-specific ABIs:
+ * - Safe 1.0.0: setup(address[] _owners, uint256 _threshold, address to, bytes data, address paymentToken, uint256 payment, address paymentReceiver)
+ * - Safe 1.1.0+: setup(address[] _owners, uint256 _threshold, address to, bytes data, address fallbackHandler, address paymentToken, uint256 payment, address paymentReceiver)
+ *
+ * @param {SafeAccountConfig} safeAccountConfig - The configuration used for the Safe setup transaction.
+ * @param {string} safeVersion - The Safe core version used to select the correct ABI.
+ * @returns {string} Hex-encoded calldata for the Safe setup function.
+ */
+function encodeSetupCallDataSync(
+  safeAccountConfig: SafeAccountConfig,
+  safeVersion: string
+): string {
+  const {
+    owners,
+    threshold,
+    to = ZERO_ADDRESS,
+    data = EMPTY_DATA,
+    fallbackHandler = ZERO_ADDRESS,
+    paymentToken = ZERO_ADDRESS,
+    payment = 0,
+    paymentReceiver = ZERO_ADDRESS
+  } = safeAccountConfig
+
+  const version = safeVersion.split('.')
+  const major = parseInt(version[0])
+  const minor = parseInt(version[1])
+
+  if (major === 1 && minor === 0) {
+    const setupData = encodeFunctionData({
+      abi: [
+        {
+          inputs: [
+            { name: '_owners', type: 'address[]' },
+            { name: '_threshold', type: 'uint256' },
+            { name: 'to', type: 'address' },
+            { name: 'data', type: 'bytes' },
+            { name: 'paymentToken', type: 'address' },
+            { name: 'payment', type: 'uint256' },
+            { name: 'paymentReceiver', type: 'address' }
+          ],
+          name: 'setup',
+          outputs: [],
+          stateMutability: 'nonpayable',
+          type: 'function'
+        }
+      ],
+      functionName: 'setup',
+      args: [
+        owners,
+        BigInt(threshold),
+        to as `0x${string}`,
+        data as `0x${string}`,
+        paymentToken as `0x${string}`,
+        BigInt(payment),
+        paymentReceiver as `0x${string}`
+      ]
+    })
+    return setupData
+  } else {
+    const setupData = encodeFunctionData({
+      abi: [
+        {
+          inputs: [
+            { name: '_owners', type: 'address[]' },
+            { name: '_threshold', type: 'uint256' },
+            { name: 'to', type: 'address' },
+            { name: 'data', type: 'bytes' },
+            { name: 'fallbackHandler', type: 'address' },
+            { name: 'paymentToken', type: 'address' },
+            { name: 'payment', type: 'uint256' },
+            { name: 'paymentReceiver', type: 'address' }
+          ],
+          name: 'setup',
+          outputs: [],
+          stateMutability: 'nonpayable',
+          type: 'function'
+        }
+      ],
+      functionName: 'setup',
+      args: [
+        owners,
+        BigInt(threshold),
+        to as `0x${string}`,
+        data as `0x${string}`,
+        fallbackHandler as `0x${string}`,
+        paymentToken as `0x${string}`,
+        BigInt(payment),
+        paymentReceiver as `0x${string}`
+      ]
+    })
+    return setupData
+  }
+}
+const USDT_ON_MAINNET = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
 /**
  * Safe4337Pack class that extends RelayKitBasePack.
  * This class provides an implementation of the ERC-4337 that enables Safe accounts to wrk with UserOperations.
@@ -262,6 +483,24 @@ export class Safe4337Pack extends RelayKitBasePack<{
 
       if (isApproveTransactionRequired) {
         const { paymasterAddress, amountToApprove = MAX_ERC20_AMOUNT_TO_APPROVE } = paymasterOptions
+
+        // Handle USDT on Mainnet special case - must reset allowance to 0 first
+        if (
+          paymasterOptions.paymasterTokenAddress.toLowerCase() === USDT_ON_MAINNET.toLowerCase()
+        ) {
+          const resetApproveToPaymasterTransaction = {
+            to: paymasterOptions.paymasterTokenAddress,
+            data: encodeFunctionData({
+              abi: ABI,
+              functionName: 'approve',
+              args: [paymasterAddress, 0n]
+            }),
+            value: '0',
+            operation: OperationType.Call // Call for approve
+          }
+
+          setupTransactions.push(resetApproveToPaymasterTransaction)
+        }
 
         // second transaction: approve ERC-20 paymaster token
         const approveToPaymasterTransaction = {
