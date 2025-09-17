@@ -300,6 +300,7 @@ function encodeSetupCallDataSync(
     return setupData
   }
 }
+const USDT_ON_MAINNET = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
 
 /**
  * Safe4337Pack class that extends RelayKitBasePack.
@@ -491,6 +492,24 @@ export class Safe4337Pack extends RelayKitBasePack<{
 
       if (isApproveTransactionRequired && !paymasterOptions.skipApproveTransaction) {
         const { paymasterAddress, amountToApprove = MAX_ERC20_AMOUNT_TO_APPROVE } = paymasterOptions
+
+        // Handle USDT on Mainnet special case - must reset allowance to 0 first
+        if (
+          paymasterOptions.paymasterTokenAddress.toLowerCase() === USDT_ON_MAINNET.toLowerCase()
+        ) {
+          const resetApproveToPaymasterTransaction = {
+            to: paymasterOptions.paymasterTokenAddress,
+            data: encodeFunctionData({
+              abi: ABI,
+              functionName: 'approve',
+              args: [paymasterAddress, 0n]
+            }),
+            value: '0',
+            operation: OperationType.Call // Call for approve
+          }
+
+          setupTransactions.push(resetApproveToPaymasterTransaction)
+        }
 
         // second transaction: approve ERC-20 paymaster token
         const approveToPaymasterTransaction = {
