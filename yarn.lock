@@ -2288,7 +2288,7 @@
     "@peculiar/asn1-schema" "^2.3.13"
 
 "@wdk-safe-global/relay-kit@file:/home/rck/Work/tether/AlonzoRicardo/safe-core-sdk/packages/relay-kit":
-  version "4.1.1"
+  version "4.1.2"
   resolved "file:packages/relay-kit"
   dependencies:
     "@gelatonetwork/relay-sdk" "^5.6.0"
