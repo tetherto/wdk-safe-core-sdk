@@ -19,6 +19,8 @@ import {
   UserOperationStringValues
 } from '@wdk-safe-global/relay-kit/packs/safe-4337/types'
 
+const USDT_ON_MAINNET = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
+
 /**
  * Encode the UserOperation execution from a transaction.
  *
@@ -53,6 +55,22 @@ async function getCallData(
   amountToApprove?: bigint
 ): Promise<string> {
   if (amountToApprove) {
+    // Handle USDT on Mainnet special case - must reset allowance to 0 first
+    if (paymasterOptions.paymasterTokenAddress.toLowerCase() === USDT_ON_MAINNET.toLowerCase()) {
+      const resetApproveToPaymasterTransaction = {
+        to: paymasterOptions.paymasterTokenAddress,
+        data: encodeFunctionData({
+          abi: ABI,
+          functionName: 'approve',
+          args: [paymasterOptions.paymasterAddress, 0n]
+        }),
+        value: '0',
+        operation: OperationType.Call // Call for approve
+      }
+
+      transactions.push(resetApproveToPaymasterTransaction)
+    }
+
     const approveToPaymasterTransaction = {
       to: paymasterOptions.paymasterTokenAddress,
       data: encodeFunctionData({
