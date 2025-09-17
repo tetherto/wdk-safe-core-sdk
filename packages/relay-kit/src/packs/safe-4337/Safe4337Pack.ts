@@ -6,7 +6,8 @@ import Safe, {
   getMultiSendContract,
   PasskeyClient,
   SafeProvider,
-  generateOnChainIdentifier
+  generateOnChainIdentifier,
+  predictSafeAddress
 } from '@wdk-safe-global/protocol-kit'
 import { RelayKitBasePack } from '@wdk-safe-global/relay-kit/RelayKitBasePack'
 import {
@@ -241,6 +242,10 @@ export class Safe4337Pack extends RelayKitBasePack<{
 
       const setupTransactions = [enable4337ModuleTransaction]
 
+      // Initialize deployment variables early
+      let deploymentTo = enable4337ModuleTransaction.to
+      let deploymentData = enable4337ModuleTransaction.data
+
       const isApproveTransactionRequired =
         !!paymasterOptions &&
         !paymasterOptions.isSponsored &&
@@ -249,22 +254,57 @@ export class Safe4337Pack extends RelayKitBasePack<{
       if (isApproveTransactionRequired && !paymasterOptions.skipApproveTransaction) {
         const { paymasterAddress, amountToApprove = MAX_ERC20_AMOUNT_TO_APPROVE } = paymasterOptions
 
-        // Handle USDT on Mainnet special case - must reset allowance to 0 first
+        // Handle USDT on Mainnet special case - must reset allowance to 0 first if current allowance != 0
         if (
           paymasterOptions.paymasterTokenAddress.toLowerCase() === USDT_ON_MAINNET.toLowerCase()
         ) {
-          const resetApproveToPaymasterTransaction = {
-            to: paymasterOptions.paymasterTokenAddress,
-            data: encodeFunctionData({
-              abi: ABI,
-              functionName: 'approve',
-              args: [paymasterAddress, 0n]
-            }),
-            value: '0',
-            operation: OperationType.Call // Call for approve
-          }
+          // Get the predicted Safe address to check current allowance
+          const predictedSafeAddress = await predictSafeAddress({
+            safeProvider: await SafeProvider.init({ provider, signer, safeVersion }),
+            chainId: BigInt(chainId),
+            safeAccountConfig: {
+              owners: options.owners,
+              threshold: options.threshold,
+              to: deploymentTo,
+              data: deploymentData,
+              fallbackHandler: safe4337ModuleAddress,
+              paymentToken: zeroAddress,
+              payment: 0,
+              paymentReceiver: zeroAddress
+            },
+            safeDeploymentConfig: {
+              safeVersion,
+              saltNonce: options.saltNonce || undefined,
+              deploymentType: options.deploymentType || undefined
+            }
+          })
 
-          setupTransactions.push(resetApproveToPaymasterTransaction)
+          // Create a SafeProvider to read contract data
+          const tempSafeProvider = await SafeProvider.init({ provider, signer, safeVersion })
+
+          // Check current allowance to paymaster using SafeProvider's readContract
+          const currentAllowance = await tempSafeProvider.readContract({
+            address: paymasterOptions.paymasterTokenAddress as `0x${string}`,
+            abi: ABI,
+            functionName: 'allowance',
+            args: [predictedSafeAddress as `0x${string}`, paymasterAddress]
+          })
+
+          // Only reset if current allowance is not 0
+          if (currentAllowance !== 0n) {
+            const resetApproveToPaymasterTransaction = {
+              to: paymasterOptions.paymasterTokenAddress,
+              data: encodeFunctionData({
+                abi: ABI,
+                functionName: 'approve',
+                args: [paymasterAddress, 0n]
+              }),
+              value: '0',
+              operation: OperationType.Call // Call for approve
+            }
+
+            setupTransactions.push(resetApproveToPaymasterTransaction)
+          }
         }
 
         // second transaction: approve ERC-20 paymaster token
@@ -322,9 +362,6 @@ export class Safe4337Pack extends RelayKitBasePack<{
         setupTransactions.push(sharedSignerTransaction)
       }
 
-      let deploymentTo
-      let deploymentData
-
       const isBatch = setupTransactions.length > 1
 
       if (isBatch) {
@@ -342,9 +379,6 @@ export class Safe4337Pack extends RelayKitBasePack<{
 
         deploymentTo = multiSendContract.getAddress()
         deploymentData = batchData
-      } else {
-        deploymentTo = enable4337ModuleTransaction.to
-        deploymentData = enable4337ModuleTransaction.data
       }
 
       protocolKit = await Safe.init({
