@@ -14,11 +14,11 @@ import {
 import BaseSafeOperation from '@wdk-safe-global/relay-kit/packs/safe-4337/BaseSafeOperation'
 import { RPC_4337_CALLS } from '@wdk-safe-global/relay-kit/packs/safe-4337/constants'
 
-type ExistingSafeOptions = {
+export type ExistingSafeOptions = {
   safeAddress: string
 }
 
-type PredictedSafeOptions = {
+export type PredictedSafeOptions = {
   owners: string[]
   threshold: number
   safeVersion?: SafeVersion
