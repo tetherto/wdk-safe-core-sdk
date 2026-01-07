@@ -1,4 +1,4 @@
-import { UserOperationStringValues } from '@safe-global/relay-kit/packs/safe-4337/types'
+import { UserOperationStringValues } from '@wdk-safe-global/relay-kit/packs/safe-4337/types'
 
 export enum PIMLICO_CUSTOM_RPC_4337_CALLS {
   GET_USER_OPERATION_GAS_PRICE = 'pimlico_getUserOperationGasPrice',

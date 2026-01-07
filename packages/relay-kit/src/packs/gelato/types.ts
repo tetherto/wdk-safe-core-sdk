@@ -1,4 +1,4 @@
-import Safe from '@safe-global/protocol-kit'
+import Safe from '@wdk-safe-global/protocol-kit'
 import {
   MetaTransactionData,
   MetaTransactionOptions,

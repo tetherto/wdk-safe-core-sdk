@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv'
-import { Safe4337Pack } from '@wdk-safe-global/relay-kit'
-import { setup4337Playground, waitForOperationToFinish } from '../utils'
+import { Safe4337Pack, GenericFeeEstimator } from '@wdk-safe-global/relay-kit'
+import { waitForOperationToFinish } from '../utils'
 
 dotenv.config({ path: './playground/relay-kit/.env' })
 
@@ -15,10 +15,6 @@ const {
   PAYMASTER_URL = '',
   POLICY_ID
 } = process.env
-
-// PIM test token contract address
-// faucet: https://dashboard.pimlico.io/test-erc20-faucet
-const pimlicoTokenAddress = '0xFC3e86566895Fb007c6A0d3809eb2827DF94F751'
 
 async function main() {
   // 1) Initialize pack with the paymaster data
@@ -37,27 +33,28 @@ async function main() {
     }
   })
 
-  // 2) Setup Playground
-  const { transactions, timestamp } = await setup4337Playground(safe4337Pack, {
-    erc20TokenAmount: 200_000n,
-    erc20TokenContractAddress: pimlicoTokenAddress
-  })
-
-  // 3) Create SafeOperation
+  // 2) Create SafeOperation
   const safeOperation = await safe4337Pack.createTransaction({
-    transactions,
+    transactions:[{
+      to: '0xfaDDcFd59924F559AC24350C4b9dA44b57E62857',
+      value: '0x0',
+      data: '0x'
+    }],
     options: {
-      validAfter: Number(timestamp - 60_000n),
-      validUntil: Number(timestamp + 60_000n)
+      feeEstimator: new GenericFeeEstimator(
+          RPC_URL,
+          CHAIN_ID,
+          1.1 //fee multiplier, defaults to 1.5
+      )
     }
   })
 
-  // 4) Sign SafeOperation
+  // 3) Sign SafeOperation
   const signedSafeOperation = await safe4337Pack.signSafeOperation(safeOperation)
 
   console.log('SafeOperation', signedSafeOperation)
 
-  // 5) Execute SafeOperation
+  // 4) Execute SafeOperation
   const userOperationHash = await safe4337Pack.executeTransaction({
     executable: signedSafeOperation
   })

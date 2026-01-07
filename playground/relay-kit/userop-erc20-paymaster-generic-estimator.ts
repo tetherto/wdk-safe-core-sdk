@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv'
-import { Safe4337Pack } from '@wdk-safe-global/relay-kit'
-import { setup4337Playground, waitForOperationToFinish } from '../utils'
+import { Safe4337Pack, GenericFeeEstimator } from '@wdk-safe-global/relay-kit'
+import { waitForOperationToFinish, setup4337Playground } from '../utils'
 
 dotenv.config({ path: './playground/relay-kit/.env' })
 
@@ -11,53 +11,56 @@ const {
   SAFE_ADDRESS = '0x',
   RPC_URL = '',
   CHAIN_ID = '',
-  BUNDLER_URL = '',
   PAYMASTER_URL = '',
-  POLICY_ID
+  BUNDLER_URL = ''
 } = process.env
 
-// PIM test token contract address
-// faucet: https://dashboard.pimlico.io/test-erc20-faucet
-const pimlicoTokenAddress = '0xFC3e86566895Fb007c6A0d3809eb2827DF94F751'
+//Candide paymaster contract address
+const paymasterAddress = '0x8b1f6cb5d062aa2ce8d581942bbb960420d875ba'
+
+// Candide test token contract address
+const tokenAddress = '0xFa5854FBf9964330d761961F46565AB7326e5a3b'
 
 async function main() {
   // 1) Initialize pack with the paymaster data
   const safe4337Pack = await Safe4337Pack.init({
     provider: RPC_URL,
     signer: PRIVATE_KEY,
-    safeModulesVersion: '0.3.0', // Blank or 0.3.0 for Entrypoint v0.7, 0.2.0 for Entrypoint v0.6
     bundlerUrl: BUNDLER_URL,
+    safeModulesVersion: '0.3.0', // Blank or 0.3.0 for Entrypoint v0.7, 0.2.0 for Entrypoint v0.6
     paymasterOptions: {
-      isSponsored: true,
       paymasterUrl: PAYMASTER_URL,
-      sponsorshipPolicyId: POLICY_ID
+      paymasterTokenAddress: tokenAddress,
+      paymasterAddress: paymasterAddress,
+      //infinit approval just for testing - don't do that in production
+      amountToApprove: 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn
     },
     options: {
       safeAddress: SAFE_ADDRESS
     }
   })
 
-  // 2) Setup Playground
-  const { transactions, timestamp } = await setup4337Playground(safe4337Pack, {
-    erc20TokenAmount: 200_000n,
-    erc20TokenContractAddress: pimlicoTokenAddress
-  })
-
-  // 3) Create SafeOperation
+  // 2) Create SafeOperation
   const safeOperation = await safe4337Pack.createTransaction({
-    transactions,
+    transactions:[{
+      to: '0xfaDDcFd59924F559AC24350C4b9dA44b57E62857',
+      value: '0x0',
+      data: '0x'
+    }],
     options: {
-      validAfter: Number(timestamp - 60_000n),
-      validUntil: Number(timestamp + 60_000n)
+      feeEstimator: new GenericFeeEstimator(
+          RPC_URL,
+          CHAIN_ID,
+      )
     }
   })
 
-  // 4) Sign SafeOperation
+  // 3) Sign SafeOperation
   const signedSafeOperation = await safe4337Pack.signSafeOperation(safeOperation)
 
   console.log('SafeOperation', signedSafeOperation)
 
-  // 5) Execute SafeOperation
+  // 4) Execute SafeOperation
   const userOperationHash = await safe4337Pack.executeTransaction({
     executable: signedSafeOperation
   })

@@ -1,6 +1,6 @@
-import { EthSafeSignature } from '@safe-global/protocol-kit'
+import { EthSafeSignature } from '@wdk-safe-global/protocol-kit'
 import SafeOperationV07 from './SafeOperationV07'
-import { fixtures } from '@safe-global/relay-kit/test-utils'
+import { fixtures } from '@wdk-safe-global/relay-kit/test-utils'
 
 describe('BaseSafeOperation', () => {
   it('should add and get signatures', () => {

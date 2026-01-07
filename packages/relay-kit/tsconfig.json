@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@safe-global/relay-kit/*": ["./src/*"]
+      "@wdk-safe-global/relay-kit/*": ["./src/*"]
     },
     "outDir": "dist"
   },

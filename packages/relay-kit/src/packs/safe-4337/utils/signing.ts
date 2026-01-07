@@ -1,5 +1,5 @@
 import { Hex, encodePacked, toHex } from 'viem'
-import { EthSafeSignature, buildSignatureBytes } from '@safe-global/protocol-kit'
+import { EthSafeSignature, buildSignatureBytes } from '@wdk-safe-global/protocol-kit'
 
 /**
  * Passkey Dummy client data JSON fields. This can be used for gas estimations, as it pads the fields enough

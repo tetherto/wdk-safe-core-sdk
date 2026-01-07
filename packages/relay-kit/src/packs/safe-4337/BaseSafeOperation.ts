@@ -7,11 +7,11 @@ import {
   SafeUserOperation,
   UserOperation
 } from '@safe-global/types-kit'
-import { buildSignatureBytes } from '@safe-global/protocol-kit'
+import { buildSignatureBytes } from '@wdk-safe-global/protocol-kit'
 import {
   EIP712_SAFE_OPERATION_TYPE_V06,
   EIP712_SAFE_OPERATION_TYPE_V07
-} from '@safe-global/relay-kit/packs/safe-4337/constants'
+} from '@wdk-safe-global/relay-kit/packs/safe-4337/constants'
 
 abstract class BaseSafeOperation implements SafeOperation {
   userOperation: UserOperation

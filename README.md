@@ -4,6 +4,7 @@
 
 ## Table of contents
 
+- [Table of contents](#table-of-contents)
 - [About](#about)
 - [Documentation](#documentation)
 - [Packages](#packages)

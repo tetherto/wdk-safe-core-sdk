@@ -1,4 +1,4 @@
-import Safe from '@safe-global/protocol-kit'
+import Safe from '@wdk-safe-global/protocol-kit'
 import { encodeFunctionData, getAddress, Hex, hexToBytes, sliceHex, toHex } from 'viem'
 import {
   MetaTransactionData,
@@ -11,13 +11,13 @@ import {
   isEntryPointV6,
   isEntryPointV7,
   encodeMultiSendCallData
-} from '@safe-global/relay-kit/packs/safe-4337/utils'
-import { ABI } from '@safe-global/relay-kit/packs/safe-4337/constants'
+} from '@wdk-safe-global/relay-kit/packs/safe-4337/utils'
+import { ABI } from '@wdk-safe-global/relay-kit/packs/safe-4337/constants'
 import {
   ERC20PaymasterOption,
   PaymasterOptions,
   UserOperationStringValues
-} from '@safe-global/relay-kit/packs/safe-4337/types'
+} from '@wdk-safe-global/relay-kit/packs/safe-4337/types'
 
 /**
  * Encode the UserOperation execution from a transaction.
@@ -145,9 +145,9 @@ export async function createUserOperation(
       nonce: nonce.toString(),
       initCode,
       callData,
-      callGasLimit: 1n,
-      verificationGasLimit: 1n,
-      preVerificationGas: 1n,
+      callGasLimit: 0n,
+      verificationGasLimit: 0n,
+      preVerificationGas: 0n,
       maxFeePerGas: 1n,
       maxPriorityFeePerGas: 1n,
       paymasterAndData,
@@ -160,9 +160,9 @@ export async function createUserOperation(
     nonce: nonce.toString(),
     ...unpackInitCode(initCode),
     callData,
-    callGasLimit: 1n,
-    verificationGasLimit: 1n,
-    preVerificationGas: 1n,
+    callGasLimit: 0n,
+    verificationGasLimit: 0n,
+    preVerificationGas: 0n,
     maxFeePerGas: 1n,
     maxPriorityFeePerGas: 1n,
     paymaster: paymasterAndData,

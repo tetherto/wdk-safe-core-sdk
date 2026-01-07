@@ -4,8 +4,8 @@ import {
   SafeUserOperation,
   SafeOperationOptions
 } from '@safe-global/types-kit'
-import BaseSafeOperation from '@safe-global/relay-kit/packs/safe-4337/BaseSafeOperation'
-import { EIP712_SAFE_OPERATION_TYPE_V06 } from '@safe-global/relay-kit/packs/safe-4337/constants'
+import BaseSafeOperation from '@wdk-safe-global/relay-kit/packs/safe-4337/BaseSafeOperation'
+import { EIP712_SAFE_OPERATION_TYPE_V06 } from '@wdk-safe-global/relay-kit/packs/safe-4337/constants'
 
 class SafeOperationV06 extends BaseSafeOperation {
   userOperation!: UserOperationV06

@@ -1,6 +1,6 @@
 {
-  "name": "@safe-global/protocol-kit",
-  "version": "6.0.4",
+  "name": "@wdk-safe-global/protocol-kit",
+  "version": "6.0.8",
   "description": "SDK that facilitates the interaction with Safe Smart Accounts",
   "types": "dist/src/index.d.ts",
   "main": "dist/cjs/src/index.cjs",
@@ -89,5 +89,8 @@
   "optionalDependencies": {
     "@noble/curves": "^1.6.0",
     "@peculiar/asn1-schema": "^2.3.13"
+  },
+  "peerDependencies": {
+    "ethers": "^6.13.7"
   }
 }

@@ -1,8 +1,8 @@
 import crypto from 'crypto'
 import dotenv from 'dotenv'
 import * as viem from 'viem'
-import Safe, * as protocolKit from '@safe-global/protocol-kit'
-import { WebAuthnCredentials, createMockPasskey } from '@safe-global/protocol-kit/test-utils'
+import Safe, * as protocolKit from '@wdk-safe-global/protocol-kit'
+import { WebAuthnCredentials, createMockPasskey } from '@wdk-safe-global/protocol-kit/test-utils'
 import {
   getSafeModuleSetupDeployment,
   getSafe4337ModuleDeployment
@@ -16,7 +16,7 @@ import {
   fixtures,
   createSafe4337Pack,
   generateTransferCallData
-} from '@safe-global/relay-kit/test-utils'
+} from '@wdk-safe-global/relay-kit/test-utils'
 
 dotenv.config()
 
@@ -1113,6 +1113,213 @@ describe('Safe4337Pack', () => {
       expect(safeOperation.getSafeOperation()).toHaveProperty('nonce', customNonce.toString())
 
       safeOperation = await safe4337Pack.signSafeOperation(safeOperation)
+    })
+  })
+
+  describe('predictSafeAddress', () => {
+    // Use hardcoded values to avoid module resolution issues
+    const OWNER_1 = '0xFfAC5578BE8AC1B2B9D13b34cAf4A074B96B8A1b'
+    const OWNER_2 = '0x3059EfD1BCe33be41eeEfd5fb6D520d7fEd54E43'
+    const OWNER_3 = '0x1234567890123456789012345678901234567890'
+    const chainId = 11155111 // Sepolia
+    const safeVersion = '1.4.1'
+    const safeModulesVersion = '0.3.0'
+    const saltNonce = '0x0000000000000000000000000000000000000000000000000000000000000001'
+
+    it('should predict address for a Safe with a single owner', () => {
+      const predictedAddress = Safe4337Pack.predictSafeAddress({
+        owners: [OWNER_1],
+        threshold: 1,
+        saltNonce,
+        chainId,
+        safeVersion,
+        safeModulesVersion
+      })
+
+      expect(predictedAddress).toMatch(/^0x[a-fA-F0-9]{40}$/)
+      expect(predictedAddress).toBe(viem.getAddress(predictedAddress)) // Should be checksummed
+    })
+
+    it('should predict address for a Safe with multiple owners (2/2)', () => {
+      const predictedAddress = Safe4337Pack.predictSafeAddress({
+        owners: [OWNER_1, OWNER_2],
+        threshold: 2,
+        saltNonce,
+        chainId,
+        safeVersion,
+        safeModulesVersion
+      })
+
+      expect(predictedAddress).toMatch(/^0x[a-fA-F0-9]{40}$/)
+      expect(predictedAddress).toBe(viem.getAddress(predictedAddress))
+    })
+
+    it('should predict address for a Safe with multiple owners (2/3)', () => {
+      const predictedAddress = Safe4337Pack.predictSafeAddress({
+        owners: [OWNER_1, OWNER_2, OWNER_3],
+        threshold: 2,
+        saltNonce,
+        chainId,
+        safeVersion,
+        safeModulesVersion
+      })
+
+      expect(predictedAddress).toMatch(/^0x[a-fA-F0-9]{40}$/)
+      expect(predictedAddress).toBe(viem.getAddress(predictedAddress))
+    })
+
+    it('should return different addresses for different owners', () => {
+      const address1 = Safe4337Pack.predictSafeAddress({
+        owners: [OWNER_1],
+        threshold: 1,
+        saltNonce,
+        chainId,
+        safeVersion,
+        safeModulesVersion
+      })
+
+      const address2 = Safe4337Pack.predictSafeAddress({
+        owners: [OWNER_2],
+        threshold: 1,
+        saltNonce,
+        chainId,
+        safeVersion,
+        safeModulesVersion
+      })
+
+      expect(address1).not.toBe(address2)
+    })
+
+    it('should return different addresses for different owner orders', () => {
+      const address1 = Safe4337Pack.predictSafeAddress({
+        owners: [OWNER_1, OWNER_2],
+        threshold: 2,
+        saltNonce,
+        chainId,
+        safeVersion,
+        safeModulesVersion
+      })
+
+      const address2 = Safe4337Pack.predictSafeAddress({
+        owners: [OWNER_2, OWNER_1],
+        threshold: 2,
+        saltNonce,
+        chainId,
+        safeVersion,
+        safeModulesVersion
+      })
+
+      // Different order should produce different addresses
+      expect(address1).not.toBe(address2)
+    })
+
+    it('should return different addresses for different thresholds', () => {
+      const address1 = Safe4337Pack.predictSafeAddress({
+        owners: [OWNER_1, OWNER_2],
+        threshold: 1,
+        saltNonce,
+        chainId,
+        safeVersion,
+        safeModulesVersion
+      })
+
+      const address2 = Safe4337Pack.predictSafeAddress({
+        owners: [OWNER_1, OWNER_2],
+        threshold: 2,
+        saltNonce,
+        chainId,
+        safeVersion,
+        safeModulesVersion
+      })
+
+      expect(address1).not.toBe(address2)
+    })
+
+    it('should return different addresses for different saltNonces', () => {
+      const address1 = Safe4337Pack.predictSafeAddress({
+        owners: [OWNER_1],
+        threshold: 1,
+        saltNonce: '0x0000000000000000000000000000000000000000000000000000000000000001',
+        chainId,
+        safeVersion,
+        safeModulesVersion
+      })
+
+      const address2 = Safe4337Pack.predictSafeAddress({
+        owners: [OWNER_1],
+        threshold: 1,
+        saltNonce: '0x0000000000000000000000000000000000000000000000000000000000000002',
+        chainId,
+        safeVersion,
+        safeModulesVersion
+      })
+
+      expect(address1).not.toBe(address2)
+    })
+
+    it('should throw an error if owners array is empty', () => {
+      expect(() => {
+        Safe4337Pack.predictSafeAddress({
+          owners: [],
+          threshold: 1,
+          saltNonce,
+          chainId,
+          safeVersion,
+          safeModulesVersion
+        })
+      }).toThrow('Owner list must have at least one owner')
+    })
+
+    it('should throw an error if threshold is less than 1', () => {
+      expect(() => {
+        Safe4337Pack.predictSafeAddress({
+          owners: [OWNER_1],
+          threshold: 0,
+          saltNonce,
+          chainId,
+          safeVersion,
+          safeModulesVersion
+        })
+      }).toThrow('Threshold must be greater than or equal to 1')
+    })
+
+    it('should throw an error if threshold is greater than owners length', () => {
+      expect(() => {
+        Safe4337Pack.predictSafeAddress({
+          owners: [OWNER_1, OWNER_2],
+          threshold: 3,
+          saltNonce,
+          chainId,
+          safeVersion,
+          safeModulesVersion
+        })
+      }).toThrow('Threshold must be lower than or equal to owners length')
+    })
+
+    it('should throw an error if Safe4337Module is not available for chain', () => {
+      expect(() => {
+        Safe4337Pack.predictSafeAddress({
+          owners: [OWNER_1],
+          threshold: 1,
+          saltNonce,
+          chainId: 999999, // Non-existent chain
+          safeVersion,
+          safeModulesVersion
+        })
+      }).toThrow(/Safe4337Module not available/)
+    })
+
+    it('should work with bigint chainId', () => {
+      const predictedAddress = Safe4337Pack.predictSafeAddress({
+        owners: [OWNER_1],
+        threshold: 1,
+        saltNonce,
+        chainId: BigInt(chainId),
+        safeVersion,
+        safeModulesVersion
+      })
+
+      expect(predictedAddress).toMatch(/^0x[a-fA-F0-9]{40}$/)
     })
   })
 })

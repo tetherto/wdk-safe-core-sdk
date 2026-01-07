@@ -12,15 +12,15 @@ import {
   estimateSafeDeploymentGas,
   createERC20TokenTransferTransaction,
   isGasTokenCompatibleWithHandlePayment
-} from '@safe-global/protocol-kit'
-import { RelayKitBasePack } from '@safe-global/relay-kit/RelayKitBasePack'
+} from '@wdk-safe-global/protocol-kit'
+import { RelayKitBasePack } from '@wdk-safe-global/relay-kit/RelayKitBasePack'
 import {
   GELATO_FEE_COLLECTOR,
   GELATO_GAS_EXECUTION_OVERHEAD,
   GELATO_NATIVE_TOKEN_ADDRESS,
   GELATO_TRANSFER_GAS_COST,
   ZERO_ADDRESS
-} from '@safe-global/relay-kit/constants'
+} from '@wdk-safe-global/relay-kit/constants'
 import {
   MetaTransactionOptions,
   RelayTransaction,
