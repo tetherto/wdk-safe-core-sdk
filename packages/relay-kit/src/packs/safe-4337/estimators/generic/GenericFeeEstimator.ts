@@ -1,15 +1,8 @@
 import { createPublicClient, http, toHex } from 'viem'
 import { EstimateGasData } from '@safe-global/types-kit'
-import {
-  EstimateFeeFunctionProps,
-  IFeeEstimator,
-  UserOperationStringValues
-} from '@safe-global/relay-kit/packs/safe-4337/types'
-import {
-  createBundlerClient,
-  userOperationToHexValues
-} from '@safe-global/relay-kit/packs/safe-4337/utils'
-import { RPC_4337_CALLS } from '@safe-global/relay-kit/packs/safe-4337/constants'
+import { EstimateFeeFunctionProps, IFeeEstimator, UserOperationStringValues } from '../../types'
+import { createBundlerClient, userOperationToHexValues } from '../../utils'
+import { RPC_4337_CALLS } from '../../constants'
 
 export type GenericFeeEstimatorOverrides = {
   callGasLimit?: bigint

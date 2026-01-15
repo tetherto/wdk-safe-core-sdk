@@ -1,4 +1,4 @@
-import { getAddress, toHex } from 'viem'
+import { getAddress, toHex, isHex } from 'viem'
 import semverSatisfies from 'semver/functions/satisfies.js'
 import Safe, {
   EthSafeSignature,
@@ -41,8 +41,8 @@ import {
   parseAbiParameters,
   pad
 } from 'viem'
-import BaseSafeOperation from '@wdk-safe-global/relay-kit/packs/safe-4337/BaseSafeOperation'
-import SafeOperationFactory from '@wdk-safe-global/relay-kit/packs/safe-4337/SafeOperationFactory'
+import BaseSafeOperation from './BaseSafeOperation'
+import SafeOperationFactory from './SafeOperationFactory'
 import {
   EstimateFeeProps,
   Safe4337CreateTransactionProps,
@@ -53,13 +53,13 @@ import {
   UserOperationWithPayload,
   PaymasterOptions,
   BundlerClient
-} from '@safe-global/relay-kit/packs/safe-4337/types'
+} from './types'
 import {
   ABI,
   DEFAULT_SAFE_VERSION,
   DEFAULT_SAFE_MODULES_VERSION,
   RPC_4337_CALLS
-} from '@safe-global/relay-kit/packs/safe-4337/constants'
+} from './constants'
 import {
   entryPointToSafeModules,
   getDummySignature,
@@ -67,11 +67,17 @@ import {
   userOperationToHexValues,
   getRelayKitVersion,
   createUserOperation
-} from '@safe-global/relay-kit/packs/safe-4337/utils'
-import { PimlicoFeeEstimator } from '@safe-global/relay-kit/packs/safe-4337/estimators/pimlico/PimlicoFeeEstimator'
+} from './utils'
+import { PimlicoFeeEstimator } from './estimators/pimlico/PimlicoFeeEstimator'
 
 const MAX_ERC20_AMOUNT_TO_APPROVE =
   0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn
+
+const EMPTY_DATA = '0x'
+
+function asHex(hex?: string): Hex {
+  return isHex(hex) ? (hex as Hex) : (`0x${hex}` as Hex)
+}
 
 const EQ_OR_GT_1_4_1 = '>=1.4.1'
 
@@ -217,12 +223,12 @@ function encodeSetupCallDataSync(
   const {
     owners,
     threshold,
-    to = ZERO_ADDRESS,
+    to = zeroAddress,
     data = EMPTY_DATA,
-    fallbackHandler = ZERO_ADDRESS,
-    paymentToken = ZERO_ADDRESS,
+    fallbackHandler = zeroAddress,
+    paymentToken = zeroAddress,
     payment = 0,
-    paymentReceiver = ZERO_ADDRESS
+    paymentReceiver = zeroAddress
   } = safeAccountConfig
 
   const version = safeVersion.split('.')
