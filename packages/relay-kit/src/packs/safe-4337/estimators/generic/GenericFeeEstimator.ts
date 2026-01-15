@@ -114,9 +114,13 @@ export class GenericFeeEstimator implements IFeeEstimator {
         toHex(chainId)
       ]
 
-      if (paymasterOptions.paymasterContext) {
-        params.push(paymasterOptions.paymasterContext)
+      const paymasterContext = paymasterOptions.paymasterContext || {}
+
+      if (paymasterOptions.sponsorshipPolicyId) {
+        paymasterContext.sponsorshipPolicyId = paymasterOptions.sponsorshipPolicyId
       }
+
+      params.push(paymasterContext)
 
       const sponsoredData = await paymasterClient.request({
         method: RPC_4337_CALLS.GET_PAYMASTER_DATA,
