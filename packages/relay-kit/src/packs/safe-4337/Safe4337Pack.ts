@@ -52,7 +52,8 @@ import {
   UserOperationReceipt,
   UserOperationWithPayload,
   PaymasterOptions,
-  BundlerClient
+  BundlerClient,
+  PimlicoTokenQuotesResponse
 } from './types'
 import {
   ABI,
@@ -1037,6 +1038,21 @@ export class Safe4337Pack extends RelayKitBasePack<{
    */
   async getChainId(): Promise<string> {
     return this.#bundlerClient.request({ method: RPC_4337_CALLS.CHAIN_ID })
+  }
+
+  async getTokenExchangeRate(token: string): Promise<bigint> {
+    const response = (await this.#bundlerClient.request({
+      method: 'pimlico_getTokenQuotes',
+      params: [{ tokens: [token] }, this.#ENTRYPOINT_ADDRESS, `0x${this.#chainId.toString(16)}`]
+    })) as PimlicoTokenQuotesResponse
+
+    const quote = response.quotes.find((q) => q.token.toLowerCase() === token.toLowerCase())
+
+    if (!quote) {
+      throw new Error(`No quote found for token ${token}`)
+    }
+
+    return BigInt(quote.exchangeRate)
   }
 
   getOnchainIdentifier(): string {
