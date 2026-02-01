@@ -62,8 +62,8 @@ function b2ab(buf: Uint8Array): ArrayBuffer {
  * @returns Whether the two arrays are equal.
  */
 function isEqualArray(a: Uint8Array, b: Uint8Array) {
-  if (a.length != b.length) return false
-  for (let i = 0; i < a.length; i++) if (a[i] != b[i]) return false
+  if (a.length !== b.length) return false
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false
   return true
 }
 
