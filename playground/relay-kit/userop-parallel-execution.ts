@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv'
-import { encodeNonce, Safe4337Pack } from '@wdk-safe-global/relay-kit'
+import { encodeNonce, Safe4337Pack } from '@tetherto/wdk-safe-relay-kit'
 import { waitForOperationToFinish, setup4337Playground } from '../utils'
 
 dotenv.config({ path: './playground/relay-kit/.env' })

@@ -3,7 +3,7 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { getBalance, waitForTransactionReceipt } from 'viem/actions'
 import { sepolia } from 'viem/chains'
 import { createSafeClient, SafeClient } from '@safe-global/sdk-starter-kit'
-import { GelatoRelayPack } from '@wdk-safe-global/relay-kit'
+import { GelatoRelayPack } from '@tetherto/wdk-safe-relay-kit'
 import {
   MetaTransactionData,
   MetaTransactionOptions,

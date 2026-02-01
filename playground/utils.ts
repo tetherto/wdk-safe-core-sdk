@@ -6,7 +6,7 @@ import {
   formatEther,
   parseAbi
 } from 'viem'
-import { Safe4337Pack } from '@wdk-safe-global/relay-kit'
+import { Safe4337Pack } from '@tetherto/wdk-safe-relay-kit'
 import { ExternalSigner } from '@safe-global/protocol-kit'
 import { getBlock, waitForTransactionReceipt } from 'viem/actions'
 import { MetaTransactionData } from '@safe-global/types-kit'

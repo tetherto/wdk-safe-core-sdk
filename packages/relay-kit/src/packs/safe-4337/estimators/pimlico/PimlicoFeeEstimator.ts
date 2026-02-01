@@ -5,12 +5,12 @@ import {
   EstimateFeeFunctionProps,
   IFeeEstimator,
   UserOperationStringValues
-} from '@wdk-safe-global/relay-kit/packs/safe-4337/types'
+} from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/types'
 import {
   createBundlerClient,
   userOperationToHexValues
-} from '@wdk-safe-global/relay-kit/packs/safe-4337/utils'
-import { RPC_4337_CALLS } from '@wdk-safe-global/relay-kit/packs/safe-4337/constants'
+} from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/utils'
+import { RPC_4337_CALLS } from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/constants'
 import { PIMLICO_CUSTOM_RPC_4337_CALLS, PimlicoCustomRpcSchema } from './types'
 
 /**

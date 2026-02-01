@@ -42,8 +42,8 @@ const sign = async (
 
   const assertion = (await getCredentials({
     publicKey: {
-      challenge: data,
-      allowCredentials: [{ type: 'public-key', id: passkeyRawId }],
+      challenge: data as BufferSource,
+      allowCredentials: [{ type: 'public-key', id: passkeyRawId as BufferSource }],
       userVerification: 'required'
     }
   })) as PublicKeyCredential

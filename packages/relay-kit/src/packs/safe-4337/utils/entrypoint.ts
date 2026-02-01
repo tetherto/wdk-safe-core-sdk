@@ -1,9 +1,9 @@
-import Safe from '@wdk-safe-global/protocol-kit'
+import Safe from '@tetherto/wdk-safe-protocol-kit'
 import {
   ENTRYPOINT_ABI,
   ENTRYPOINT_ADDRESS_V06,
   ENTRYPOINT_ADDRESS_V07
-} from '@wdk-safe-global/relay-kit/packs/safe-4337/constants'
+} from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/constants'
 
 const EQ_0_2_0 = '0.2.0'
 

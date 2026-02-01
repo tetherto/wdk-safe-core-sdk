@@ -1,12 +1,12 @@
 import { Hex, PublicRpcSchema, createPublicClient, encodeFunctionData, http, rpcSchema } from 'viem'
 import { OperationType, MetaTransactionData } from '@safe-global/types-kit'
-import { encodeMultiSendData } from '@wdk-safe-global/protocol-kit'
-import { ABI } from '@wdk-safe-global/relay-kit/packs/safe-4337/constants'
+import { encodeMultiSendData } from '@tetherto/wdk-safe-protocol-kit'
+import { ABI } from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/constants'
 import {
   BundlerClient,
   RpcSchemaEntry,
   Safe4337RpcSchema
-} from '@wdk-safe-global/relay-kit/packs/safe-4337/types'
+} from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/types'
 
 /**
  * Gets the EIP-4337 bundler provider.

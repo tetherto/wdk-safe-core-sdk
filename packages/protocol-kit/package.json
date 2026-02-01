@@ -1,5 +1,5 @@
 {
-  "name": "@wdk-safe-global/protocol-kit",
+  "name": "@tetherto/wdk-safe-protocol-kit",
   "version": "6.1.3",
   "description": "SDK that facilitates the interaction with Safe Smart Accounts",
   "types": "dist/src/index.d.ts",

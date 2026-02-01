@@ -1,6 +1,6 @@
 import { Hex, encodePacked } from 'viem'
-import { EthSafeSignature } from '@wdk-safe-global/protocol-kit'
-import { fixtures } from '@wdk-safe-global/relay-kit/test-utils'
+import { EthSafeSignature } from '@tetherto/wdk-safe-protocol-kit'
+import { fixtures } from '@tetherto/wdk-safe-relay-kit/test-utils'
 import SafeOperationV06 from './SafeOperationV06'
 import BaseSafeOperation from './BaseSafeOperation'
 

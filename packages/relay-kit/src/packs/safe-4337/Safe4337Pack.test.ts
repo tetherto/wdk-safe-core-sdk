@@ -1,8 +1,8 @@
 import crypto from 'crypto'
 import dotenv from 'dotenv'
 import * as viem from 'viem'
-import Safe, * as protocolKit from '@wdk-safe-global/protocol-kit'
-import { WebAuthnCredentials, createMockPasskey } from '@wdk-safe-global/protocol-kit/test-utils'
+import Safe, * as protocolKit from '@tetherto/wdk-safe-protocol-kit'
+import { WebAuthnCredentials, createMockPasskey } from '@tetherto/wdk-safe-protocol-kit/test-utils'
 import {
   getSafeModuleSetupDeployment,
   getSafe4337ModuleDeployment
@@ -16,7 +16,7 @@ import {
   fixtures,
   createSafe4337Pack,
   generateTransferCallData
-} from '@wdk-safe-global/relay-kit/test-utils'
+} from '@tetherto/wdk-safe-relay-kit/test-utils'
 
 dotenv.config()
 

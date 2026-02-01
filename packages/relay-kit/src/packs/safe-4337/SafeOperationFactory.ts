@@ -4,10 +4,10 @@ import {
   UserOperationV07,
   SafeOperationOptions
 } from '@safe-global/types-kit'
-import SafeOperationV06 from '@wdk-safe-global/relay-kit/packs/safe-4337/SafeOperationV06'
-import SafeOperationV07 from '@wdk-safe-global/relay-kit/packs/safe-4337/SafeOperationV07'
-import BaseSafeOperation from '@wdk-safe-global/relay-kit/packs/safe-4337/BaseSafeOperation'
-import { isEntryPointV6 } from '@wdk-safe-global/relay-kit/packs/safe-4337/utils'
+import SafeOperationV06 from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/SafeOperationV06'
+import SafeOperationV07 from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/SafeOperationV07'
+import BaseSafeOperation from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/BaseSafeOperation'
+import { isEntryPointV6 } from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/utils'
 
 class SafeOperationFactory {
   /**

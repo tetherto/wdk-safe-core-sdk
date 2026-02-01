@@ -1,4 +1,4 @@
-import Safe from '@wdk-safe-global/protocol-kit'
+import Safe from '@tetherto/wdk-safe-protocol-kit'
 import { encodeFunctionData, getAddress, Hex, hexToBytes, sliceHex, toHex } from 'viem'
 import {
   MetaTransactionData,
@@ -11,13 +11,13 @@ import {
   isEntryPointV6,
   isEntryPointV7,
   encodeMultiSendCallData
-} from '@wdk-safe-global/relay-kit/packs/safe-4337/utils'
-import { ABI } from '@wdk-safe-global/relay-kit/packs/safe-4337/constants'
+} from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/utils'
+import { ABI } from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/constants'
 import {
   ERC20PaymasterOption,
   PaymasterOptions,
   UserOperationStringValues
-} from '@wdk-safe-global/relay-kit/packs/safe-4337/types'
+} from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/types'
 
 const USDT_ON_MAINNET = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
 

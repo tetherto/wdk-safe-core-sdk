@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "@wdk-safe-global/relay-kit/*": ["./src/*"]
+      "@tetherto/wdk-safe-relay-kit/*": ["./src/*"]
     },
     "outDir": "dist"
   },

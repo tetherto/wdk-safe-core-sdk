@@ -1,5 +1,5 @@
 import { PimlicoFeeEstimator } from './PimlicoFeeEstimator'
-import { fixtures } from '@wdk-safe-global/relay-kit/test-utils'
+import { fixtures } from '@tetherto/wdk-safe-relay-kit/test-utils'
 import { PIMLICO_CUSTOM_RPC_4337_CALLS } from './types'
 import { RPC_4337_CALLS } from '../../constants'
 import Safe from '@safe-global/protocol-kit'

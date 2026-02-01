@@ -9,9 +9,9 @@ import Safe, {
   generateOnChainIdentifier,
   SafeAccountConfig,
   predictSafeAddress
-} from '@wdk-safe-global/protocol-kit'
+} from '@tetherto/wdk-safe-protocol-kit'
 import { SafeVersion } from '@safe-global/types-kit'
-import { RelayKitBasePack } from '@wdk-safe-global/relay-kit/RelayKitBasePack'
+import { RelayKitBasePack } from '@tetherto/wdk-safe-relay-kit/RelayKitBasePack'
 import {
   OperationType,
   SafeOperationConfirmation,

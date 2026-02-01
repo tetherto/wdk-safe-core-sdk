@@ -1,5 +1,5 @@
 import dotenv from 'dotenv'
-import { Safe4337Pack, GenericFeeEstimator } from '@wdk-safe-global/relay-kit'
+import { Safe4337Pack, GenericFeeEstimator } from '@tetherto/wdk-safe-relay-kit'
 import { waitForOperationToFinish } from '../utils'
 
 dotenv.config({ path: './playground/relay-kit/.env' })

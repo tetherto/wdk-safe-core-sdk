@@ -3,7 +3,7 @@ import Safe, {
   DeploymentType,
   SafeProviderConfig,
   OnchainAnalyticsProps
-} from '@wdk-safe-global/protocol-kit'
+} from '@tetherto/wdk-safe-protocol-kit'
 import {
   EstimateGasData,
   MetaTransactionData,
@@ -11,8 +11,8 @@ import {
   SafeVersion,
   UserOperation
 } from '@safe-global/types-kit'
-import BaseSafeOperation from '@wdk-safe-global/relay-kit/packs/safe-4337/BaseSafeOperation'
-import { RPC_4337_CALLS } from '@wdk-safe-global/relay-kit/packs/safe-4337/constants'
+import BaseSafeOperation from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/BaseSafeOperation'
+import { RPC_4337_CALLS } from '@tetherto/wdk-safe-relay-kit/packs/safe-4337/constants'
 
 export type ExistingSafeOptions = {
   safeAddress: string

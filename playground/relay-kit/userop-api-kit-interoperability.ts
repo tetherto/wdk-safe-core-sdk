@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
 import { privateKeyToAddress } from 'viem/accounts'
 import SafeApiKit from '@safe-global/api-kit'
-import { Safe4337Pack } from '@wdk-safe-global/relay-kit'
+import { Safe4337Pack } from '@tetherto/wdk-safe-relay-kit'
 import { waitForOperationToFinish } from '../utils'
 
 // Variables

@@ -5,14 +5,14 @@ import Safe, {
   estimateSafeTxGas,
   estimateSafeDeploymentGas,
   createERC20TokenTransferTransaction
-} from '@wdk-safe-global/protocol-kit'
+} from '@tetherto/wdk-safe-protocol-kit'
 import { MetaTransactionData, OperationType, SafeTransaction } from '@safe-global/types-kit'
 
 import {
   GELATO_FEE_COLLECTOR,
   GELATO_NATIVE_TOKEN_ADDRESS,
   ZERO_ADDRESS
-} from '@wdk-safe-global/relay-kit/constants'
+} from '@tetherto/wdk-safe-relay-kit/constants'
 import { GelatoRelayPack } from './GelatoRelayPack'
 
 enum TaskState {
@@ -71,7 +71,7 @@ jest.mock('@gelatonetwork/relay-sdk', () => {
   }
 })
 
-jest.mock('@wdk-safe-global/protocol-kit')
+jest.mock('@tetherto/wdk-safe-protocol-kit')
 
 // Cast the import to jest.Mocked type
 const mockEstimateTxBaseGas = estimateTxBaseGas as jest.MockedFunction<typeof estimateTxBaseGas>
@@ -88,8 +88,8 @@ const mockedIsGasTokenCompatibleWithHandlePayment =
     typeof isGasTokenCompatibleWithHandlePayment
   >
 
-jest.doMock('@wdk-safe-global/protocol-kit', () => ({
-  ...jest.requireActual('@wdk-safe-global/protocol-kit'),
+jest.doMock('@tetherto/wdk-safe-protocol-kit', () => ({
+  ...jest.requireActual('@tetherto/wdk-safe-protocol-kit'),
   estimateTxBaseGas: mockEstimateTxBaseGas,
   estimateSafeTxGas: mockEstimateSafeTxGas,
   estimateSafeDeploymentGas: mockEstimateSafeDeploymentGas,

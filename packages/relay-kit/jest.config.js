@@ -5,9 +5,9 @@ const config = {
     '^.+\\.ts?$': 'ts-jest'
   },
   moduleNameMapper: {
-    '^@wdk-safe-global/protocol-kit/tests/(.*)$': '<rootDir>/../protocol-kit/tests/$1',
-    '^@wdk-safe-global/relay-kit/test-utils$': '<rootDir>/test-utils',
-    '^@wdk-safe-global/relay-kit/(.*)$': '<rootDir>/src/$1'
+    '^@tetherto/wdk-safe-protocol-kit/tests/(.*)$': '<rootDir>/../protocol-kit/tests/$1',
+    '^@tetherto/wdk-safe-relay-kit/test-utils$': '<rootDir>/test-utils',
+    '^@tetherto/wdk-safe-relay-kit/(.*)$': '<rootDir>/src/$1'
   },
   testTimeout: 20000
 }

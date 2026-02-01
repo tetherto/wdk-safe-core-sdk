@@ -1,6 +1,6 @@
-import { EthSafeSignature } from '@wdk-safe-global/protocol-kit'
+import { EthSafeSignature } from '@tetherto/wdk-safe-protocol-kit'
 import SafeOperationV07 from './SafeOperationV07'
-import { fixtures } from '@wdk-safe-global/relay-kit/test-utils'
+import { fixtures } from '@tetherto/wdk-safe-relay-kit/test-utils'
 
 describe('BaseSafeOperation', () => {
   it('should add and get signatures', () => {

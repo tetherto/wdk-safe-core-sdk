@@ -196,7 +196,7 @@ export function encodeTypedData(typedData: EIP712TypedData): string {
   if (domain)
     parts.push(
       hashDomain({
-        domain,
+        domain: domain as any,
         types: types
       })
     )

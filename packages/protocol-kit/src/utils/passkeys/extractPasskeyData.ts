@@ -25,9 +25,8 @@ function base64ToUint8Array(base64: string): Uint8Array {
 async function importLibs() {
   const { p256 } = await import('@noble/curves/p256')
 
-  const { AsnParser, AsnProp, AsnPropTypes, AsnType, AsnTypeTypes } = await import(
-    '@peculiar/asn1-schema'
-  )
+  const { AsnParser, AsnProp, AsnPropTypes, AsnType, AsnTypeTypes } =
+    await import('@peculiar/asn1-schema')
 
   @AsnType({ type: AsnTypeTypes.Sequence })
   class AlgorithmIdentifier {
@@ -79,7 +78,7 @@ export async function decodePublicKeyForReactNative(
   const isUncompressedKey = publicKeyBytes.length === 64
 
   if (isAsn1Encoded) {
-    const asn1ParsedKey = AsnParser.parse(publicKeyBytes.buffer, ECPublicKey)
+    const asn1ParsedKey = AsnParser.parse(publicKeyBytes.buffer as ArrayBuffer, ECPublicKey)
 
     publicKeyBytes = new Uint8Array(asn1ParsedKey.publicKey)
   } else if (isUncompressedKey) {
