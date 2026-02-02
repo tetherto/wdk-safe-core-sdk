@@ -52,7 +52,8 @@
   ],
   "homepage": "https://github.com/safe-global/safe-core-sdk#readme",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "dependencies": {
     "@gelatonetwork/relay-sdk": "^5.6.1",
