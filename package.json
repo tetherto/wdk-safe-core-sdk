@@ -40,8 +40,10 @@
     "typescript": "~5.5.4",
     "viem": "^2.21.8"
   },
-  "overrides": {
-    "ox": "0.6.7"
+  "resolutions": {
+    "ox": "0.6.7",
+    "tar": "^7.5.7",
+    "glob": "^10.4.5"
   },
   "lint-staged": {
     "./packages/**/*.{js,jsx,ts,tsx}": [
